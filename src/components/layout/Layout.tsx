@@ -15,10 +15,10 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
     <div className="min-h-screen flex flex-col bg-white text-base">
       <Navbar />
 
-      <div className="flex flex-1 h-[calc(100vh-4rem)]">
+      <div className="flex flex-1 h-[calc(100vh-64px)]">
         {showSidebar && (
           <div className="hidden md:block w-20 md:w-60 flex-shrink-0">
-            <div className="fixed h-[calc(100vh-4rem)] w-20 md:w-60">
+            <div className="flex flex-1 h-[calc(100vh-64px)]">
               <Sidebar className="h-full" />
             </div>
           </div>

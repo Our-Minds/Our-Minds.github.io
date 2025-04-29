@@ -29,7 +29,22 @@ export function HomePage() {
         }
         
         if (storiesData) {
-          setStories(storiesData as Story[]);
+          // Map snake_case fields to camelCase for Story type
+          const mappedStories: Story[] = storiesData.map((s) => ({
+            id:           s.id!,
+            title:        s.title!,
+            snippet:      s.snippet!,
+            content:      s.content!,
+            cover_image:  s.cover_image!,
+            author_id:    s.author_id!,
+            authorName:   s.author_name ?? 'Anonymous',
+            authorImage:  s.author_image ?? '',
+            published_at: s.published_at!,
+            tags:         s.tags ?? [],
+            tag_type:     s.tag_type as Story['tag_type'],
+            is_featured:  s.is_featured ?? false,
+          }));
+          setStories(mappedStories);
         }
       } catch (error: any) {
         console.error('Error fetching stories:', error);
@@ -65,9 +80,7 @@ export function HomePage() {
         </div>
         
         <div className="w-full lg:w-1/2 p-4 h-full">
-          <div className="flex justify-between items-center mb-4">
-            {isAuthenticated && <CreateStoryDialog />}
-          </div>
+          
           <div className="h-[calc(100vh-8rem)] overflow-y-auto">
             <StoryHighlights stories={stories} isLoading={isLoading} />
           </div>
