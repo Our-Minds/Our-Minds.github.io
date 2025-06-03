@@ -166,7 +166,7 @@ export function SignupForm() {
   return (
     <div className="w-full max-w-lg space-y-6 p-6 bg-[#025803] rounded-lg shadow-md">
       <div className="text-center">
-        <img src="/public/assets/OurMinds.png" alt="Our Minds Logo" className="mx-auto h-12 w-12" />
+        <img src="/assets/OurMinds.png" alt="Our Minds Logo" className="mx-auto h-12 w-12" />
         <h1 className="mt-4 text-2xl font-bold text-white">
           Create an account
         </h1>

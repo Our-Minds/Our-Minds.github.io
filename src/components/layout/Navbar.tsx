@@ -19,7 +19,7 @@ export function Navbar() {
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center">
-            <img src="/public/assets/OurMinds.png" alt="Our Minds Logo" className="h-8 w-8" />
+            <img src="/assets/OurMinds.png" alt="Our Minds Logo" className="h-8 w-8" />
             <span className="ml-2 text-lg font-semibold">OUR MINDS</span>
           </Link>
         </div>
