@@ -1,7 +1,23 @@
-
 import { useEffect, useRef } from 'react';
-import { ChatThread } from '@/data/mockChats';
 import { cn } from '@/lib/utils';
+import { ChatParticipant } from '@/hooks/useChatMessages';
+
+interface Message {
+  id: string;
+  senderId: string;
+  content: string;
+  timestamp: string;
+  senderName: string;
+  senderImage: string;
+  image?: string;
+}
+
+interface ChatThread {
+  id: string;
+  messages: Message[];
+  participants: ChatParticipant[];
+  lastActive: string;
+}
 
 interface ChatMessagesProps {
   chat: ChatThread;
@@ -9,18 +25,18 @@ interface ChatMessagesProps {
 
 export function ChatMessages({ chat }: ChatMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chat.messages]);
-  
+
   const groupMessagesByDate = (messages: ChatThread['messages']) => {
     const groups: { date: string; messages: typeof messages }[] = [];
     let currentDate = '';
-    
-    messages.forEach(message => {
+
+    messages.forEach((message) => {
       const messageDate = new Date(message.timestamp).toLocaleDateString();
-      
+
       if (messageDate !== currentDate) {
         currentDate = messageDate;
         groups.push({
@@ -31,18 +47,16 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
         groups[groups.length - 1].messages.push(message);
       }
     });
-    
+
     return groups;
   };
-  
-  const messageGroups = groupMessagesByDate(chat.messages);
-  
+
   const getFormattedDate = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     if (date.toDateString() === today.toDateString()) {
       return 'Today';
     } else if (date.toDateString() === yesterday.toDateString()) {
@@ -55,7 +69,9 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
       });
     }
   };
-  
+
+  const messageGroups = groupMessagesByDate(chat.messages);
+
   return (
     <div className="flex-1 overflow-y-auto p-4">
       {messageGroups.map((group, groupIndex) => (
@@ -65,26 +81,16 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
               {getFormattedDate(group.date)}
             </span>
           </div>
-          
-          {group.messages.map((message, messageIndex) => {
-            const isCurrentUser = message.senderId === '1';
-            
+
+          {group.messages.map((message) => {
+            const isCurrentUser =
+              chat.participants.find((p) => p.name === 'You')?.id === message.senderId;
+
             return (
               <div
                 key={message.id}
-                className={cn(
-                  'flex mb-4',
-                  isCurrentUser ? 'justify-end' : 'justify-start'
-                )}
+                className={cn('flex mb-4', isCurrentUser ? 'justify-end' : 'justify-start')}
               >
-                {!isCurrentUser && (
-                  <img
-                    src={message.senderImage}
-                    alt={message.senderName}
-                    className="w-8 h-8 rounded-full mr-2 self-end"
-                  />
-                )}
-                
                 <div className="max-w-[70%]">
                   <div
                     className={cn(
@@ -103,7 +109,7 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
                       />
                     )}
                   </div>
-                  
+
                   <div
                     className={cn(
                       'text-xs text-gray-500 mt-1',
@@ -112,24 +118,16 @@ export function ChatMessages({ chat }: ChatMessagesProps) {
                   >
                     {new Date(message.timestamp).toLocaleTimeString([], {
                       hour: '2-digit',
-                      minute: '2-digit'
+                      minute: '2-digit',
                     })}
                   </div>
                 </div>
-                
-                {isCurrentUser && (
-                  <img
-                    src={message.senderImage}
-                    alt={message.senderName}
-                    className="w-8 h-8 rounded-full ml-2 self-end"
-                  />
-                )}
               </div>
             );
           })}
         </div>
       ))}
-      
+
       <div ref={messagesEndRef} />
     </div>
   );

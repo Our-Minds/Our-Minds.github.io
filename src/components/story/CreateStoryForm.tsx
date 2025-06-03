@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -8,22 +8,43 @@ import { useAuth } from '@/context/AuthContext';
 import { StoryImageUploader } from './StoryImageUploader';
 import { StoryTagSelector, STORY_TAG_OPTIONS } from './StoryTagSelector';
 import { StoryFormFields } from './StoryFormFields';
+import { Story } from '@/utils/consultantTypes';
 
-export function CreateStoryForm({ onClose }: { onClose: () => void }) {
+interface CreateStoryFormProps {
+  onClose: () => void;
+  story?: Story;
+}
+
+export function CreateStoryForm({ onClose, story }: CreateStoryFormProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    snippet: '',
-    content: '',
-    tags: ['Mental Health'],
-    tagType: 'mental' as 'mental' | 'control' | 'drugs' | 'life' | 'anxiety' | 'depression',
-    coverImage: '',
+    title: story?.title || '',
+    snippet: story?.snippet || '',
+    content: story?.content || '',
+    tags: story?.tags || ['Mental Health'],
+    tagType: (story?.tag_type || 'mental') as 'mental' | 'control' | 'drugs' | 'life' | 'anxiety' | 'depression',
+    coverImage: story?.cover_image || '',
   });
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>('');
+  const [imagePreview, setImagePreview] = useState<string>(story?.cover_image || '');
+
+  // Set initial data if editing an existing story
+  useEffect(() => {
+    if (story) {
+      setImagePreview(story.cover_image);
+      setFormData({
+        title: story.title,
+        snippet: story.snippet,
+        content: story.content,
+        tags: story.tags,
+        tagType: story.tag_type,
+        coverImage: story.cover_image,
+      });
+    }
+  }, [story]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -103,7 +124,7 @@ export function CreateStoryForm({ onClose }: { onClose: () => void }) {
     
     try {
       // Upload image first if selected
-      let coverImageUrl = '/public/lovable-uploads/7646df82-fc16-4ccb-8469-742a8722685b.png'; // Default image
+      let coverImageUrl = formData.coverImage;
       
       if (selectedImage) {
         coverImageUrl = await uploadImage(selectedImage);
@@ -125,18 +146,31 @@ export function CreateStoryForm({ onClose }: { onClose: () => void }) {
         author_id: user.id,
         tags: formData.tags,
         tag_type: formData.tagType,
-        is_featured: false,
-        published_at: new Date().toISOString()
+        is_featured: story ? story.is_featured : false,
+        published_at: story ? story.published_at : new Date().toISOString()
       };
+
+      let result;
       
-      console.log("Creating story with data:", storyData);
+      if (story) {
+        // Update existing story
+        result = await supabase
+          .from('stories')
+          .update(storyData)
+          .eq('id', story.id)
+          .eq('author_id', user.id)
+          .select('id')
+          .single();
+      } else {
+        // Insert new story
+        result = await supabase
+          .from('stories')
+          .insert(storyData)
+          .select('id')
+          .single();
+      }
       
-      // Insert into database
-      const { data: story, error } = await supabase
-        .from('stories')
-        .insert(storyData)
-        .select('id')
-        .single();
+      const { data, error } = result;
       
       if (error) {
         console.error("Supabase error details:", error);
@@ -144,20 +178,25 @@ export function CreateStoryForm({ onClose }: { onClose: () => void }) {
       }
       
       toast({
-        title: "Story published!",
-        description: "Your story has been published successfully",
+        title: story ? "Story updated!" : "Story published!",
+        description: story ? "Your story has been updated successfully" : "Your story has been published successfully",
       });
       
       onClose();
       
+      // Refresh the page to show the updated stories list
       setTimeout(() => {
-        navigate(`/story/${story.id}`);
+        if (story) {
+          window.location.reload();
+        } else {
+          navigate(`/story/${data.id}`);
+        }
       }, 500);
     } catch (error: any) {
-      console.error('Error creating story:', error);
+      console.error('Error creating/updating story:', error);
       toast({
-        title: "Failed to create story",
-        description: error?.message || "There was an error publishing your story. Please try again.",
+        title: story ? "Failed to update story" : "Failed to create story",
+        description: error?.message || "There was an error. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -190,7 +229,7 @@ export function CreateStoryForm({ onClose }: { onClose: () => void }) {
           Cancel
         </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Publishing..." : "Publish Story"}
+          {isSubmitting ? (story ? "Updating..." : "Publishing...") : (story ? "Update Story" : "Publish Story")}
         </Button>
       </DialogFooter>
     </form>

@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      about_content: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          section: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          section: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          section?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           content: string
@@ -42,6 +69,20 @@ export type Database = {
             referencedRelation: "chat_threads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_msgs_sender"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_msgs_thread"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
         ]
       }
       chat_threads: {
@@ -69,7 +110,60 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "fk_threads_consultant"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_threads_user"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consultant_availability: {
+        Row: {
+          consultant_id: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          consultant_id: string
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          consultant_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consultant_availability_consultant_id_fkey"
+            columns: ["consultant_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consultants: {
         Row: {
@@ -113,6 +207,42 @@ export type Database = {
           review_count?: number
           specialization?: string[]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          mission: string
+          paypal_client_id: string | null
+          paypal_client_secret: string | null
+          platform_fee_percentage: number
+          updated_at: string | null
+          values: string
+          vision: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          mission?: string
+          paypal_client_id?: string | null
+          paypal_client_secret?: string | null
+          platform_fee_percentage?: number
+          updated_at?: string | null
+          values?: string
+          vision?: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          mission?: string
+          paypal_client_id?: string | null
+          paypal_client_secret?: string | null
+          platform_fee_percentage?: number
+          updated_at?: string | null
+          values?: string
+          vision?: string
         }
         Relationships: []
       }
@@ -203,6 +333,7 @@ export type Database = {
           is_featured: boolean
           published_at: string
           snippet: string
+          status: string | null
           tag_type: string
           tags: string[]
           title: string
@@ -217,6 +348,7 @@ export type Database = {
           is_featured?: boolean
           published_at?: string
           snippet: string
+          status?: string | null
           tag_type: string
           tags?: string[]
           title: string
@@ -231,9 +363,52 @@ export type Database = {
           is_featured?: boolean
           published_at?: string
           snippet?: string
+          status?: string | null
           tag_type?: string
           tags?: string[]
           title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number
+          email: string | null
+          id: string
+          is_active: boolean
+          linkedin_url: string | null
+          name: string
+          position: string
+          profile_image: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          linkedin_url?: string | null
+          name: string
+          position: string
+          profile_image?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          linkedin_url?: string | null
+          name?: string
+          position?: string
+          profile_image?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -341,7 +516,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      mark_messages_as_read: {
+        Args: { p_thread_id: string; p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

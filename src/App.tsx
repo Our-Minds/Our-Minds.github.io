@@ -1,47 +1,66 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route } from "react-router-dom"; // Remove BrowserRouter here
-import { AuthProvider } from "./context/AuthContext";
 
-// Pages
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import SignupPage from "./pages/SignupPage";
-import ChatPage from "./pages/ChatPage";
-import NotFound from "./pages/NotFound";
-import ConsultPage from "./pages/ConsultPage";
-import BookSessionPage from "./pages/BookSessionPage";
-import ProfilePage from "./pages/ProfilePage";
-import AdminPanel from "./pages/AdminPanel";
-import StoryPage from "./pages/StoryPage";
+import React from 'react';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate
+} from "react-router-dom";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
-const queryClient = new QueryClient();
+import Index from './pages/Index';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import ProfilePage from './pages/ProfilePage';
+import PublicProfilePage from './pages/PublicProfilePage';
+import StoryPage from './pages/StoryPage';
+import ChatPage from './pages/ChatPage';
+import ConsultPage from './pages/ConsultPage';
+import BookSessionPage from './pages/BookSessionPage';
+import AdminPanel from './pages/AdminPanel';
+import AboutPage from './pages/AboutPage';
+import NotFound from './pages/NotFound';
+import { AuthProvider } from './context/AuthContext';
+import AuthGuard from './components/auth/AuthGuard';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <Routes> {/* Removed BrowserRouter here */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/chat" element={<ChatPage />} />
-          <Route path="/chat/:consultantId" element={<ChatPage />} />
-          <Route path="/consult" element={<ConsultPage />} />
-          <Route path="/book-session" element={<BookSessionPage />} />
-          <Route path="/book-session/:consultantId" element={<BookSessionPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/admin" element={<AdminPanel />} />
-          <Route path="/story/:storyId" element={<StoryPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="light" storageKey="theme-preference">
+          <RouterProvider router={
+            createBrowserRouter([
+              { path: "/", element: <Navigate to="/home" /> },
+              { path: "/home", element: <Index /> },
+              { path: "/about", element: <AboutPage /> },
+              { path: "/login", element: <LoginPage /> },
+              { path: "/signup", element: <SignupPage /> },
+              { path: "/profile", element: <AuthGuard><ProfilePage /></AuthGuard> },
+              { path: "/profile/:userId", element: <PublicProfilePage /> },
+              { path: "/story/:storyId", element: <StoryPage /> },
+              { path: "/chat/:threadId?", element: <AuthGuard><ChatPage /></AuthGuard> },
+              { path: "/consult", element: <ConsultPage /> },
+              { path: "/book-session/:consultantId?", element: <AuthGuard><BookSessionPage /></AuthGuard> },
+              { path: "/admin", element: <AuthGuard requireAdmin={true}><AdminPanel /></AuthGuard> },
+              { path: "*", element: <NotFound /> }
+            ])
+          } />
+          <Toaster position="top-right" richColors />
+        </ThemeProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

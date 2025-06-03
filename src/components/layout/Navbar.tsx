@@ -15,11 +15,11 @@ export function Navbar() {
   } = useAuth();
   const [createStoryOpen, setCreateStoryOpen] = useState(false);
   
-  return <header className="sticky top-0 z-20 w-full bg-mental-green-800 text-white">
+  return <header className="sticky top-0 z-20 w-full bg-[#025803] text-white">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center space-x-6">
           <Link to="/" className="flex items-center">
-            <img src="/OurMinds.png" alt="Our Minds Logo" className="h-8 w-8" />
+            <img src="/public/assets/OurMinds.png" alt="Our Minds Logo" className="h-8 w-8" />
             <span className="ml-2 text-lg font-semibold">OUR MINDS</span>
           </Link>
         </div>
@@ -39,7 +39,7 @@ export function Navbar() {
         <div className="flex items-center space-x-4">
           {isAuthenticated ? <>
               
-              {/* Removed the open and onOpenChange props since they're not expected */}
+              
               <CreateStoryDialog />
               
               <DropdownMenu>

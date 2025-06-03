@@ -4,9 +4,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProfileSettings from '@/components/profile/ProfileSettings';
 import { useAuth } from '@/context/AuthContext';
 import FinancesTab from '@/components/profile/FinancesTab';
+import AvailabilityTab from '@/components/profile/AvailabilityTab';
+import SessionsTab from '@/components/profile/SessionsTab';
+import StoriesTab from '@/components/profile/StoriesTab';
+
+// No need for useEffect or useNavigate since we'll use AuthGuard
 
 export function ProfilePage() {
   const { profile, isConsultant, isAdmin } = useAuth();
+  
+  if (!profile) {
+    return (
+      <Layout>
+        <div className="container mx-auto py-6 px-4">
+          <h1 className="text-2xl font-bold mb-6">Loading profile...</h1>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
@@ -37,35 +52,17 @@ export function ProfilePage() {
               </TabsContent>
 
               <TabsContent value="availability">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h2 className="text-xl font-semibold mb-4">Manage Your Availability</h2>
-                  <p className="text-gray-600">
-                    Configure when you're available for sessions.
-                  </p>
-                  {/* Availability management UI would go here */}
-                </div>
+                <AvailabilityTab />
               </TabsContent>
             </>
           )}
           
           <TabsContent value="sessions">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Your Sessions</h2>
-              <p className="text-gray-600">
-                View your upcoming and past sessions.
-              </p>
-              {/* Session history would go here */}
-            </div>
+            <SessionsTab />
           </TabsContent>
           
           <TabsContent value="stories">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h2 className="text-xl font-semibold mb-4">Your Stories</h2>
-              <p className="text-gray-600">
-                Manage stories you've shared on the platform.
-              </p>
-              {/* Stories management would go here */}
-            </div>
+            <StoriesTab />
           </TabsContent>
         </Tabs>
       </div>

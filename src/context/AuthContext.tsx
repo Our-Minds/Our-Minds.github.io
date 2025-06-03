@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +20,7 @@ export interface UserProfile {
 
 interface AuthContextType {
   user: User | null;
+  session: Session | null; // Added session to the context
   profile: UserProfile | null;
   loading: boolean;
   error: string | null;
@@ -31,12 +31,14 @@ interface AuthContextType {
   isAdmin: boolean;
   isConsultant: boolean;
   isOwner: boolean;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null); // Added session state
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Fetch user profile from auth user metadata
   const fetchProfile = async (userId: string) => {
     try {
+      console.log("Fetching profile for user:", userId);
       // First check if user exists in the database
       const { data, error } = await supabase
         .from('users')
@@ -88,6 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         setProfile(userProfile);
+        console.log("Profile fetched successfully:", userProfile);
       } else if (user?.user_metadata) {
         // New user, create profile from metadata
         const metadata = user.user_metadata;
@@ -97,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           name: metadata.name || user.email?.split('@')[0] || 'User',
           role: 'user', // Default role for new users
         });
+        console.log("Created profile from metadata");
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -108,35 +113,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Add the refreshProfile function
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id);
+    }
+  };
+
   useEffect(() => {
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          // Use setTimeout to prevent potential auth deadlock
-          setTimeout(() => {
-            fetchProfile(session.user.id);
-          }, 0);
-        } else {
-          setProfile(null);
+    // This function contains the initialization logic
+    const initializeAuth = async () => {
+      try {
+        // Set up auth state listener FIRST
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, newSession) => {
+            console.log("Auth state changed:", event, newSession?.user?.id);
+            
+            // Update the session state
+            setSession(newSession);
+            
+            // Only update user if session state changed
+            const newUser = newSession?.user ?? null;
+            setUser(newUser);
+            
+            if (newUser) {
+              // Use setTimeout to prevent potential auth deadlock
+              setTimeout(() => {
+                fetchProfile(newUser.id);
+              }, 0);
+            } else {
+              setProfile(null);
+            }
+          }
+        );
+
+        // THEN check current session
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        console.log("Current session:", currentSession?.user?.id);
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id);
         }
+        
+        setLoading(false);
+
+        return () => {
+          subscription.unsubscribe();
+        };
+      } catch (error) {
+        console.error("Auth initialization error:", error);
+        setLoading(false);
       }
-    );
-
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      }
-    });
-
-    setLoading(false);
-
-    return () => {
-      subscription.unsubscribe();
     };
+
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -148,6 +181,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) throw error;
+      
+      // Set session first, then user
+      setSession(data.session);
+      setUser(data.user);
       
       if (data.user) {
         await fetchProfile(data.user.id);
@@ -263,7 +300,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Computed properties based on the user's role
-  const isAuthenticated = !!user;
+  const isAuthenticated = !!session && !!user;
   const isAdmin = profile?.role === 'admin' || profile?.role === 'owner';
   const isConsultant = profile?.role === 'consultant';
   const isOwner = profile?.role === 'owner';
@@ -271,6 +308,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       user,
+      session, // Add session to the context value
       profile,
       loading,
       error,
@@ -280,7 +318,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated,
       isAdmin,
       isConsultant,
-      isOwner
+      isOwner,
+      refreshProfile
     }}>
       {children}
     </AuthContext.Provider>

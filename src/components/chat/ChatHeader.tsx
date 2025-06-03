@@ -1,5 +1,5 @@
 
-import { ChatParticipant } from '@/data/mockChats';
+import { ChatParticipant } from '@/hooks/useChatMessages';
 
 interface ChatHeaderProps {
   participants: ChatParticipant[];
@@ -18,6 +18,9 @@ export function ChatHeader({ participants, currentUserId }: ChatHeaderProps) {
                 src={participant.image}
                 alt={participant.name}
                 className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
               />
               <div className="ml-3">
                 <h3 className="font-semibold">{participant.name}</h3>

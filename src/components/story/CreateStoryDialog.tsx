@@ -8,21 +8,33 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { Story } from "@/utils/consultantTypes";
 import CreateStoryForm from "./CreateStoryForm";
 
-export function CreateStoryDialog() {
+interface CreateStoryDialogProps {
+  children?: React.ReactNode;
+  story?: Story;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function CreateStoryDialog({ children, story, onOpenChange }: CreateStoryDialogProps) {
   const [open, setOpen] = useState(false);
   
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (onOpenChange) onOpenChange(newOpen);
+  };
+  
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>Share Your Story</Button>
+        {children || <Button>Share Your Story</Button>}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create a New Story</DialogTitle>
+          <DialogTitle>{story ? 'Edit Your Story' : 'Create a New Story'}</DialogTitle>
         </DialogHeader>
-        <CreateStoryForm onClose={() => setOpen(false)} />
+        <CreateStoryForm story={story} onClose={() => handleOpenChange(false)} />
       </DialogContent>
     </Dialog>
   );

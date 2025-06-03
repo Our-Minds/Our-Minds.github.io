@@ -80,7 +80,11 @@ export function SignupForm() {
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = `${fileName}`;
+      
+      // Create a temporary ID for users that don't have an ID yet during signup
+      // This will be replaced after signup with their actual user ID
+      const tempUserId = `temp_${Math.random().toString(36).substring(2, 15)}`;
+      const filePath = `${tempUserId}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('profile_images')
@@ -123,14 +127,18 @@ export function SignupForm() {
     setIsLoading(true);
     
     try {
-      // Upload image if selected
-      let imageUrl = '';
-      if (selectedFile) {
-        imageUrl = await uploadProfileImage(selectedFile);
-      } else {
-        // Use a default image if none provided
-        imageUrl = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
-      }
+  
+    let imageUrl = '';
+    if (selectedFile) {
+      imageUrl = await uploadProfileImage(selectedFile);
+     } else {
+    
+      const firstInitial = name?.charAt(0).toUpperCase() || 'U'; // 'U' for unknown
+
+    
+      imageUrl = `https://ui-avatars.com/api/?name=${firstInitial}&background=random&color=fff`;
+    }
+
       
       const userData = {
         name,
@@ -156,13 +164,13 @@ export function SignupForm() {
   };
 
   return (
-    <div className="w-full max-w-lg space-y-6 p-6 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-lg space-y-6 p-6 bg-[#025803] rounded-lg shadow-md">
       <div className="text-center">
-        <img src="/public/lovable-uploads/5d54d80c-c1d7-4113-b8c7-f8ea5bf4d297.png" alt="Our Minds Logo" className="mx-auto h-12 w-12" />
-        <h1 className="mt-4 text-2xl font-bold text-mental-green-800">
+        <img src="/public/assets/OurMinds.png" alt="Our Minds Logo" className="mx-auto h-12 w-12" />
+        <h1 className="mt-4 text-2xl font-bold text-white">
           Create an account
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-gray-200">
           Join our mental health community today
         </p>
       </div>
@@ -172,38 +180,38 @@ export function SignupForm() {
           <TabsTrigger 
             value="user" 
             onClick={() => setRole('user')}
-            className="data-[state=active]:bg-mental-green-100 data-[state=active]:text-mental-green-800"
+            className="data-[state=active]:bg-mental-green-100 data-[state=active]:text-black"
           >
             Regular User
           </TabsTrigger>
           <TabsTrigger 
             value="consultant" 
             onClick={() => setRole('consultant')}
-            className="data-[state=active]:bg-mental-green-100 data-[state=active]:text-mental-green-800"
+            className="data-[state=active]:bg-mental-green-100 data-[state=active]:text-black"
           >
             Consultant
           </TabsTrigger>
         </TabsList>
         
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-2">
+          <div className="text-gray-100 space-y-2">
             <Label htmlFor="name">Full Name</Label>
-            <Input
+            <Input className="w-full  text-black"
               id="name"
               type="text"
-              placeholder="John Doe"
+              placeholder=""
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="text-gray-100 space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
+            <Input className="w-full  text-black"
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder=""
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -212,12 +220,12 @@ export function SignupForm() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input
+              <Input className="w-full  text-black"
                 id="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -225,12 +233,12 @@ export function SignupForm() {
               />
             </div>
             
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
+              <Input className="w-full  text-black"
                 id="confirmPassword"
                 type="password"
-                placeholder="••••••••"
+                placeholder=""
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
@@ -240,7 +248,7 @@ export function SignupForm() {
           </div>
 
           <TabsContent value="consultant" className="space-y-4">
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label>Profile Picture</Label>
               <div className="flex flex-col items-center">
                 <div className="relative">
@@ -286,18 +294,18 @@ export function SignupForm() {
                   accept="image/*"
                 />
                 
-                <p className="mt-4 text-xs text-gray-500">
+                <p className="mt-4 text-xs text-gray-200">
                   Click the camera icon to upload your profile image
                 </p>
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="specialization">Specialization</Label>
               <Select 
                 onValueChange={(value) => setSpecialization([value])}
                 defaultValue="General Mental Health"
-              >
+              > 
                 <SelectTrigger>
                   <SelectValue placeholder="Select a specialization" />
                 </SelectTrigger>
@@ -313,7 +321,7 @@ export function SignupForm() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="languages">Languages</Label>
               <Select 
                 onValueChange={(value) => setLanguages([value])}
@@ -333,9 +341,9 @@ export function SignupForm() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="location">Location</Label>
-              <Input
+              <Input className="w-full  text-black"
                 id="location"
                 type="text"
                 placeholder="City, Country"
@@ -344,30 +352,30 @@ export function SignupForm() {
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="text-gray-100 space-y-2">
               <Label htmlFor="paypalEmail">PayPal Email (for payments)</Label>
-              <Input
+              <Input className="w-full  text-black"
                 id="paypalEmail"
                 type="email"
-                placeholder="your-paypal@example.com"
+                placeholder=""
                 value={paypalEmail}
                 onChange={(e) => setPaypalEmail(e.target.value)}
               />
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-200">
                 You can update this later in your profile settings.
               </p>
             </div>
           </TabsContent>
 
-          <Button type="submit" className="w-full bg-mental-green-600 hover:bg-mental-green-700" disabled={isLoading}>
+          <Button type="submit" className="w-full bg-mental-green-400 hover:bg-mental-green-500" disabled={isLoading}>
             {isLoading ? 'Creating account...' : 'Create account'}
           </Button>
         </form>
       </Tabs>
 
       <div className="text-center text-sm">
-        <span className="text-gray-500">Already have an account? </span>
-        <Link to="/login" className="text-mental-green-600 hover:underline">
+        <span className="text-gray-200">Already have an account? </span>
+        <Link to="/login" className="text-mental-green-300 hover:underline">
           Log in
         </Link>
       </div>
