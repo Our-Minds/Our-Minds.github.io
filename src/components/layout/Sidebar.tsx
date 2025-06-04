@@ -171,7 +171,7 @@ export function Sidebar({ className }: SidebarProps) {
         
         <div className="mt-auto p-4 border-t border-gray-300">
           <p className="text-xs text-gray-500 hidden md:block">Powered by</p>
-          <p className="text-sm font-medium text-mental-green-700 hidden md:block">Our Minds</p>
+          <p className="text-sm font-medium text-mental-green-700 hidden md:block">Bornelabs</p>
         </div>
       </nav>
     </aside>
