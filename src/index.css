@@ -1,0 +1,197 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 120 50% 30%; /* Green theme */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 120 40% 94%; /* Light green accent */
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 120 50% 30%; /* Green ring to match primary */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 0%; /* Pure black background */
+    --foreground: 0 0% 98%; /* White text on black */
+
+    --card: 0 0% 8%; /* Dark grey for cards */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 120 100% 11%; /* #025803 as primary */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 12%; /* Dark grey secondary */
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 120 100% 6%; /* Darker accent based on #025803 */
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%; /* Dark grey borders */
+    --input: 0 0% 15%; /* Dark grey input */
+    --ring: 120 100% 11%; /* #025803 ring */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Custom Scrollbar Styling - Dark Theme Compatible */
+  * {
+    scrollbar-width: thin;
+  }
+
+  /* Light theme scrollbar */
+  :root * {
+    scrollbar-color: #68b250 #f0f9ed;
+  }
+
+  :root *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  :root *::-webkit-scrollbar-track {
+    background: #f0f9ed;
+    border-radius: 4px;
+  }
+
+  :root *::-webkit-scrollbar-thumb {
+    background: #68b250;
+    border-radius: 4px;
+    border: 1px solid #dcf0d4;
+  }
+
+  :root *::-webkit-scrollbar-thumb:hover {
+    background: #4c9331;
+  }
+
+  :root *::-webkit-scrollbar-thumb:active {
+    background: #3a7626;
+  }
+
+  :root *::-webkit-scrollbar-corner {
+    background: #f0f9ed;
+  }
+
+  /* Dark theme scrollbar */
+  .dark * {
+    scrollbar-color: #025803 #1a1a1a;
+  }
+
+  .dark *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dark *::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 4px;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background: #025803;
+    border-radius: 4px;
+    border: 1px solid #333333;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:hover {
+    background: #037004;
+  }
+
+  .dark *::-webkit-scrollbar-thumb:active {
+    background: #014502;
+  }
+
+  .dark *::-webkit-scrollbar-corner {
+    background: #1a1a1a;
+  }
+
+  /* Thin scrollbar variant for smaller areas */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  :root .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #92ce7f;
+    border: none;
+  }
+
+  :root .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #68b250;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #025803;
+    border: none;
+  }
+
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #037004;
+  }
+
+  /* Hidden scrollbar but still scrollable */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .sidebar-link {
+    @apply flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-mental-green-100 dark:hover:bg-mental-green-950 transition-colors;
+  }
+  
+  .sidebar-link.active {
+    @apply bg-mental-green-100 dark:bg-mental-green-950 text-mental-green-700 dark:text-mental-green-300;
+  }
+
+  .story-tag {
+    @apply text-xs font-medium px-2.5 py-0.5 rounded text-white;
+  }
+}
